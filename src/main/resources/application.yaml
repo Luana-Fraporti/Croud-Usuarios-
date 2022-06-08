@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/checkin?currentSchema=cadastro
+    username: postgres
+    password: admin
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    generate-ddl: false
+    properties:
+      hibernate:
+        default_schema: cadastro
+        format_sql: true
+        temp:
+          use_jdbc_metadata_defaults: false
+        ddl-auto: none
+    show-sql: true
