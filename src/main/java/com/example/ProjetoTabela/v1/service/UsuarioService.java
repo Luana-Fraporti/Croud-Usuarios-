@@ -1,46 +1,94 @@
 package com.example.ProjetoTabela.v1.service;
 
+import com.example.ProjetoTabela.domain.models.Dependente;
+import com.example.ProjetoTabela.domain.models.Documentos;
 import com.example.ProjetoTabela.domain.models.Usuario;
+import com.example.ProjetoTabela.domain.repository.DependenteRepository;
+import com.example.ProjetoTabela.domain.repository.DocumentosRepository;
 import com.example.ProjetoTabela.domain.repository.UsuarioRepository;
 import com.example.ProjetoTabela.exceptions.ApiException;
+import com.example.ProjetoTabela.v1.DTO.UsuarioDTO;
+import com.example.ProjetoTabela.v1.DTO.iUsuarioDTO;
 import lombok.AllArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
+import java.util.Set;
 
 @Service
 @AllArgsConstructor
 public class UsuarioService {
     UsuarioRepository usuarioRepository;
 
+    DocumentosRepository documentosRepository;
+
+    DependenteRepository dependenteRepository;
+
     public List<Usuario> findAll() {
         return usuarioRepository.findAll();
     }
 
     public Usuario update(Usuario usuario) {
-        usuarioRepository.findById(usuario.getId()).orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST,
-                "Usuário não existe, não dá pra atualizar quem não existe"));
+        usuarioRepository.findById(usuario.getId())
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario não encontrado para atualização"));
         try {
+            if (Objects.nonNull(usuario.getDependente())) {
+                usuario.getDependente().forEach(dependente -> dependente.setUser(usuario));
+            }
+            if (Objects.nonNull(usuario.getDocumentos())) {
+                usuario.getDocumentos().forEach(documento -> documento.setUser(usuario));
+            }
             return usuarioRepository.save(usuario);
-        }
-        //A ordem do catch deve seguir também a ordem de herança e polimorfismo
-        catch (DataIntegrityViolationException dive) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Não é possível salvar usuário com mesmo e-mail");
-        } catch (RuntimeException re) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Nao foi possivel atualizar o usuario, entre em contato com o suporte");
+        } catch (RuntimeException ex) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Não foi possível salvar o usuário");
         }
     }
 
-    public Usuario retrieve(Long id) {
-        return usuarioRepository.findById(id).orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Não há registros na base"));
+    public UsuarioDTO retrieve(Long id) {
+        return new UsuarioDTO(usuarioRepository.findUserById(id).orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Não há registros na base")));
     }
 
-    public  Usuario save(Usuario usuario) {
+    public iUsuarioDTO retrieveOnlyUserInformation(Long id) {
+        return usuarioRepository.findUserByIdInterface(id).orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Não há registros na base"));
+    }
+
+    public UsuarioDTO retrieveLight(Long id) {
+        UsuarioDTO user = new UsuarioDTO(usuarioRepository.findUserByIdInterface(id).orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Não há registros na base")));
+        user.setDependente();
+        user.setDocumentos();
+        return null;
+    }
+
+    public Usuario save(Usuario usuario) {
         try {
-            return usuarioRepository.save(usuario);
+            Set<Dependente> dependente = new HashSet<>();
+            Set<Documentos> documentos = new HashSet<>();
+            if (!Objects.isNull(usuario.getDependente())) {
+                for (Dependente dependente1 : usuario.getDependente()) {
+                    dependente.add(dependente1);
+                }
+                usuario.getDependente().clear();
+            }
+            if (!Objects.isNull(usuario.getDocumentos())) {
+                for (Documentos documento : usuario.getDocumentos()) {
+                    documentos.add(documento);
+                }
+                usuario.getDocumentos().clear();
+            }
+            Usuario usuarioSalvo = usuarioRepository.save(usuario);
+            if (!documentos.isEmpty()) {
+                documentos.forEach(doc -> doc.setUser(usuarioSalvo));
+                usuarioSalvo.getDocumentos().addAll(documentosRepository.saveAll(documentos));
+            }
+            if (!dependente.isEmpty()) {
+                dependente.forEach(dep -> dep.setUser(usuarioSalvo));
+                usuarioSalvo.getDependente().addAll(dependenteRepository.saveAll(dependente));
+            }
+
+            return usuarioSalvo;
         } catch (RuntimeException ex) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Não foi possível salvar o usuário");
         }
@@ -57,4 +105,3 @@ public class UsuarioService {
         }
     }
 }
-
