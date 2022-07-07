@@ -1,11 +1,11 @@
 package com.example.ProjetoTabela.v1.DTO;
 
-import com.example.ProjetoTabela.domain.models.Documentos;
 import com.example.ProjetoTabela.domain.models.Usuario;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -19,8 +19,8 @@ public class UsuarioDTO {
     private String email;
     private int idade;
     private String ativo;
-    private Set<DependenteDTO> dependente;
-    private Set<DocumentoDTO> documentos;
+    private Set<DependenteDTO> dependente = new HashSet<>();
+    private Set<DocumentoDTO> documentos ;
 
     public UsuarioDTO(Usuario u) {
         this.id = u.getId();
@@ -47,5 +47,19 @@ public class UsuarioDTO {
         this.email = u.getEmail();
         this.idade = u.getIdade();
         this.ativo = u.getAtivo();
+    }
+
+    public void setDependente() {
+    }
+
+    public void setDocumentos() {
+    }
+
+    public short getSobrenome() {
+        return 0;
+    }
+
+    public boolean isAtivo() {
+        return false;
     }
 }

@@ -7,17 +7,21 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.Set;
 
-@Entity (name = "t_usuarios")
-@Table (name = "t_usuarios")
+import static javax.persistence.FetchType.LAZY;
+
+@Entity(name = "t_usuarios")
+@Table(name = "t_usuarios")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Usuario {
 
     @Id
-    @Column(updatable = false,nullable = true)
+    @Column(updatable = false, nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -35,14 +39,12 @@ public class Usuario {
 
     @Column(name = "ativo")
     private boolean ativo;
-    public Usuario(Usuario u) {
-        this.id = u.id;
-        this.nome = u.nome;
-        this.sobrenome = u.sobrenome;
-        this.email = u.email;
-        this.idade = u.idade;
-        this.ativo = u.ativo;
-    }
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = LAZY)
+    private Set<Dependente> dependente;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = LAZY)
+    private Set<Documentos> documentos;
 
     public Usuario(String john, String john1, String s, int i, String ativo) {
     }

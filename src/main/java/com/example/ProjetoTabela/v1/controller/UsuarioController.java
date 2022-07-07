@@ -8,6 +8,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.Set;
 
 @Controller
 @AllArgsConstructor
@@ -18,7 +20,7 @@ public class UsuarioController {
 
     @PostMapping
     @ResponseBody
-    public Usuario C(@RequestBody Usuario usuario) {
+    public UsuarioDTO C(@Valid @RequestBody Usuario usuario) {
         return usuarioService.save(usuario);
     }
 
@@ -28,9 +30,24 @@ public class UsuarioController {
             return usuarioService.retrieve(id);
     }
 
+    @GetMapping(value = "/all")
+    @ResponseBody
+    public List<UsuarioDTO> RFindAllMapper() {
+        return usuarioService.findAllMapper();
+    }
+    @GetMapping(value = "/mapper/{id}")
+    @ResponseBody
+    public UsuarioDTO RMapper(@PathVariable Long id) {
+        return usuarioService.retrieveMapper(id);
+    }
+    @GetMapping(value = "/mapper")
+    @ResponseBody
+    public Set<UsuarioDTO> FindAllR() {
+        return usuarioService.findAll();
+    }
     @PutMapping
     @ResponseBody
-    public Usuario U(@Valid @RequestBody Usuario usuario) {
+    public UsuarioDTO U(@Valid @RequestBody Usuario usuario) {
         return usuarioService.update(usuario);
     }
 

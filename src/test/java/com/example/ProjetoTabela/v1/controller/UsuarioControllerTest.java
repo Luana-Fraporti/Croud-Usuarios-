@@ -2,6 +2,7 @@ package com.example.ProjetoTabela.v1.controller;
 
 import com.example.ProjetoTabela.domain.models.Usuario;
 import com.example.ProjetoTabela.domain.repository.UsuarioRepository;
+import com.example.ProjetoTabela.v1.DTO.UsuarioDTO;
 import com.example.ProjetoTabela.v1.service.UsuarioService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
@@ -51,7 +52,7 @@ public class UsuarioControllerTest {
     public void testfindById() throws Exception {
         Usuario usuario = new Usuario(1L, "lua", "silva", "luna@gmail.com", 30, true, null, null);
         List<Usuario> userList = List.of(usuario);
-        Mockito.when(usuarioService.retrieve(1L)).thenReturn(usuario);
+        Mockito.when(usuarioService.retrieve(1L));
         assertEquals(usuarioController.R(usuario.getId()), usuario);
     }
 
@@ -59,9 +60,9 @@ public class UsuarioControllerTest {
     public void criarUsuarioTest() {
         Usuario usuarioParaCriar = new Usuario(null, "matheus", "bernardes", "bernardes@email.com", 22, false, null, null);
         Usuario usuarioCriado = new Usuario(1L, "matheus", "bernardes", "bernardes@email.com", 22, true, null, null);
-        when(usuarioService.save(usuarioParaCriar)).thenReturn(usuarioCriado);
+        when(usuarioService.save(usuarioParaCriar));
 
-        Usuario controllerCreateUsuario = usuarioController.C(usuarioParaCriar);
+        UsuarioDTO controllerCreateUsuario = usuarioController.C(usuarioParaCriar);
         Assert.assertEquals(controllerCreateUsuario.getNome(), usuarioCriado.getNome());
         Assert.assertEquals(controllerCreateUsuario.getSobrenome(), usuarioCriado.getSobrenome());
         Assert.assertEquals(controllerCreateUsuario.getEmail(), usuarioCriado.getEmail());
@@ -81,8 +82,8 @@ public class UsuarioControllerTest {
     public void updateUsuarioTest() {
         Usuario usuario = new Usuario(1L, "Alex", "kolenchiski", "alex@hotmail.com", 32, true, null, null);
         Usuario usuario1 = new Usuario(1L, "Alice", "Silva", "alice@hotmail.com", 31, true, null, null);
-        when(usuarioService.update(usuario)).thenReturn(usuario1);
-        Usuario usuarioSalvo = usuarioController.U(usuario);
+        when(usuarioService.update(usuario));
+        UsuarioDTO usuarioSalvo = usuarioController.U(usuario);
         assertEquals(usuarioSalvo.getId(), usuario1.getId());
         assertEquals(usuarioSalvo.getNome(), usuario1.getNome());
         assertEquals(usuarioSalvo.getSobrenome(), usuario1.getSobrenome());

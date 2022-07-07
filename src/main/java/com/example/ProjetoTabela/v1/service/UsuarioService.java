@@ -1,5 +1,6 @@
 package com.example.ProjetoTabela.v1.service;
 
+import com.example.ProjetoTabela.Mapper.Mappable;
 import com.example.ProjetoTabela.domain.models.Dependente;
 import com.example.ProjetoTabela.domain.models.Documentos;
 import com.example.ProjetoTabela.domain.models.Usuario;
@@ -13,25 +14,39 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-public class UsuarioService {
+public class UsuarioService implements Mappable {
     UsuarioRepository usuarioRepository;
 
     DocumentosRepository documentosRepository;
 
     DependenteRepository dependenteRepository;
 
-    public List<Usuario> findAll() {
-        return usuarioRepository.findAll();
+    public Set<UsuarioDTO> findAll() {
+        Set<UsuarioDTO> list = usuarioRepository.findAll().stream()
+                .map(UsuarioDTO::new)
+                .collect(Collectors.toSet());
+        list.forEach(usuarioDTO -> usuarioDTO.setDocumentos(documentosRepository.obterDocumentosPorIdDoUsuario(usuarioDTO.getId())));
+        return list;
+    }
+    public List<UsuarioDTO> findAllMapper() {
+        return map(usuarioRepository.findAll(),UsuarioDTO.class);
     }
 
-    public Usuario update(Usuario usuario) {
+    // retriveMapper
+    public UsuarioDTO retrieveMapper(Long id) {
+        return map(usuarioRepository.findUserById(id).orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Não há registros na base")),UsuarioDTO.class);
+    }
+    @Transactional
+    public UsuarioDTO update(Usuario usuario) {
         usuarioRepository.findById(usuario.getId())
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario não encontrado para atualização"));
         try {
@@ -41,7 +56,7 @@ public class UsuarioService {
             if (Objects.nonNull(usuario.getDocumentos())) {
                 usuario.getDocumentos().forEach(documento -> documento.setUser(usuario));
             }
-            return usuarioRepository.save(usuario);
+            return new UsuarioDTO(usuarioRepository.save(usuario));
         } catch (RuntimeException ex) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Não foi possível salvar o usuário");
         }
@@ -59,10 +74,11 @@ public class UsuarioService {
         UsuarioDTO user = new UsuarioDTO(usuarioRepository.findUserByIdInterface(id).orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Não há registros na base")));
         user.setDependente();
         user.setDocumentos();
-        return null;
+        return user;
     }
 
-    public Usuario save(Usuario usuario) {
+    @Transactional
+    public UsuarioDTO save(Usuario usuario) {
         try {
             Set<Dependente> dependente = new HashSet<>();
             Set<Documentos> documentos = new HashSet<>();
@@ -88,12 +104,13 @@ public class UsuarioService {
                 usuarioSalvo.getDependente().addAll(dependenteRepository.saveAll(dependente));
             }
 
-            return usuarioSalvo;
+            return new UsuarioDTO(usuarioRepository.save(usuarioSalvo));
         } catch (RuntimeException ex) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Não foi possível salvar o usuário");
         }
     }
 
+    @Transactional
     public void delete(Long id) {
         if (usuarioRepository.findById(id).isEmpty()) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Não existe usuário na base com esse ID para deletar");

@@ -6,6 +6,7 @@ import com.example.ProjetoTabela.domain.repository.DependenteRepository;
 import com.example.ProjetoTabela.domain.repository.DocumentosRepository;
 import com.example.ProjetoTabela.domain.repository.UsuarioRepository;
 import com.example.ProjetoTabela.exceptions.ApiException;
+import com.example.ProjetoTabela.v1.DTO.UsuarioDTO;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -69,7 +70,7 @@ public class UsuarioServiceTest {
         Usuario usuario1 = new Usuario(1L, "John", "John", "john@gmail.com", 30, true, null, null);
         Mockito.when(usuarioRepository.save(usuario)).thenReturn(usuario1);
         Mockito.when(usuarioRepository.findById(usuario.getId())).thenReturn(Optional.of(usuario1));
-        Usuario usuarioSalvo = usuarioService.update(usuario);
+        UsuarioDTO usuarioSalvo = usuarioService.update(usuario);
         assertEquals(usuarioSalvo.getId(), usuario1.getId());
         assertEquals(usuarioSalvo.getNome(), usuario1.getNome());
         assertEquals(usuarioSalvo.getSobrenome(), usuario1.getSobrenome());

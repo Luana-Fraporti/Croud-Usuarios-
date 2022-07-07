@@ -3,6 +3,7 @@ package com.example.ProjetoTabela.v1.DTO;
 import com.example.ProjetoTabela.domain.models.Documentos;
 import com.example.ProjetoTabela.domain.models.OrgaoDeExpedicao;
 import com.example.ProjetoTabela.domain.models.enums.EnumTipoDocumento;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,7 @@ public class DocumentoDTO {
     private Long id;
     private EnumTipoDocumento tipoDeDocumento;
     private String numero;
+    @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate dataDeExpedicao;
     private OrgaoDeExpedicaoDTO orgaoExpedicao;
 
